@@ -1,5 +1,3 @@
-import pytest
-
 from src.models import Category, Product
 
 
@@ -30,5 +28,14 @@ def test_category_counters():
     c1 = Category("Cat1", "Desc1", [p1])
     c2 = Category("Cat2", "Desc2", [p2])
 
+    # Теперь проверим количество категорий и продуктов через c1 и c2
     assert Category.category_count == 2
     assert Category.product_count == 2
+
+    # Можно добавить дополнительную проверку для самих объектов
+    assert c1.name == "Cat1"
+    assert c2.name == "Cat2"
+    assert len(c1.products) == 1
+    assert len(c2.products) == 1
+    assert c1.products[0].name == "P1"
+    assert c2.products[0].name == "P2"
