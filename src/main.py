@@ -1,12 +1,14 @@
 from src.models import Category, Product
 
 if __name__ == "__main__":
+    # Создание продуктов
     product1 = Product(
         "Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5
     )
     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
     product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
 
+    # Вывод данных о продуктах
     print(product1.name)
     print(product1.description)
     print(product1.price)
@@ -22,18 +24,21 @@ if __name__ == "__main__":
     print(product3.price)
     print(product3.quantity)
 
+    # Создание категории с продуктами
     category1 = Category(
         "Смартфоны",
         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
         [product1, product2, product3],
     )
 
+    # Проверка имени категории и вывод информации о категории
     print(category1.name == "Смартфоны")
     print(category1.description)
-    print(len(category1._products))  # напрямую, потому что products — str-представление
+    print(len(category1.products))  # Показываем количество товаров
     print(Category.category_count)
     print(Category.product_count)
 
+    # Создание нового продукта и новой категории
     product4 = Product('55" QLED 4K', "Фоновая подсветка", 123000.0, 7)
     category2 = Category(
         "Телевизоры",
@@ -41,20 +46,26 @@ if __name__ == "__main__":
         [product4],
     )
 
+    # Вывод данных о второй категории
     print(category2.name)
     print(category2.description)
-    print(len(category2._products))
+    print(len(category2.products))
     print(category2.products)
 
     print(Category.category_count)
     print(Category.product_count)
 
-    print("\nТестируем Category.new_product:")
-    product_data = {
-        "name": "Test Product",
-        "description": "Created via new_product",
-        "price": 50000.0,
-        "quantity": 3,
-    }
-    new_prod = Category.new_product(product_data)
-    print(new_prod.name, new_prod.description, new_prod.price, new_prod.quantity)
+    # Строковое представление продуктов и категорий
+    print("\nСтроковое представление продуктов:")
+    print(str(product1))
+    print(str(product2))
+    print(str(product3))
+
+    print("\nСтроковое представление категории:")
+    print(str(category1))
+
+    # Пример сложения продуктов
+    print("\nРезультат сложения продуктов:")
+    print(product1 + product2)
+    print(product1 + product3)
+    print(product2 + product3)

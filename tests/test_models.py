@@ -73,8 +73,7 @@ def test_category_products():
     assert category.products == expected_str
 
 
-@classmethod
-def new_product(cls, product_data: dict):
+def new_product(product_data: dict):
     return Product(
         product_data["name"],
         product_data["description"],

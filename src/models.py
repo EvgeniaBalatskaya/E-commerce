@@ -8,6 +8,11 @@ class Product:
     def __str__(self):
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
+    def __add__(self, other):
+        if not isinstance(other, Product):
+            return NotImplemented
+        return self.price * self.quantity + other.price * other.quantity
+
     @property
     def price(self):
         return self.__price
@@ -41,7 +46,8 @@ class Category:
             self.add_product(product)
 
     def __str__(self):
-        return f"{self.name}: {self.description}"
+        total_quantity = sum(product.quantity for product in self._products)
+        return f"{self.name}, {self.description}. Количество продуктов: {total_quantity} шт."
 
     def add_product(self, product):
         if not isinstance(product, Product):
