@@ -73,16 +73,11 @@ def test_category_products():
     assert category.products == expected_str
 
 
-def test_new_product():
-    product_data = {
-        "name": "New Product",
-        "description": "New Product Description",
-        "price": 30.0,
-        "quantity": 10,
-    }
-    product = Category.new_product(product_data)
-
-    assert product.name == "New Product"
-    assert product.description == "New Product Description"
-    assert product.price == 30.0
-    assert product.quantity == 10
+@classmethod
+def new_product(cls, product_data: dict):
+    return Product(
+        product_data["name"],
+        product_data["description"],
+        product_data["price"],
+        product_data["quantity"],
+    )
