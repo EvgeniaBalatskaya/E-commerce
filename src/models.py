@@ -1,50 +1,12 @@
-class Category:
-    category_count = 0
-    product_count = 0
-
-    def __init__(self, name: str, description: str, products: list):
-        self.name = name
-        self.description = description
-        self._products: list[Product] = []  # <-- аннотация типа
-
-        Category.category_count += 1
-        for product in products:
-            self.add_product(product)
-
-    def add_product(self, product):
-        if not isinstance(product, Product):
-            raise TypeError(
-                "Можно добавлять только объекты класса Product или его наследников."
-            )
-        self._products.append(product)
-        Category.product_count += 1
-
-    @property
-    def products(self):
-        return (
-            "\n".join(
-                f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
-                for product in self._products
-            )
-            + "\n"
-        )
-
-    @classmethod
-    def new_product(cls, product_data: dict):
-        return Product(
-            product_data["name"],
-            product_data["description"],
-            product_data["price"],
-            product_data["quantity"],
-        )
-
-
 class Product:
     def __init__(self, name: str, description: str, price: float, quantity: int):
         self.name = name
         self.description = description
-        self.__price = price  # Приватный
+        self.__price = price
         self.quantity = quantity
+
+    def __str__(self):
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     @property
     def price(self):
@@ -63,3 +25,41 @@ class Product:
                     self.__price = value
             else:
                 self.__price = value
+
+
+class Category:
+    category_count = 0
+    product_count = 0
+
+    def __init__(self, name: str, description: str, products: list):
+        self.name = name
+        self.description = description
+        self._products: list[Product] = []
+
+        Category.category_count += 1
+        for product in products:
+            self.add_product(product)
+
+    def __str__(self):
+        return f"{self.name}: {self.description}"
+
+    def add_product(self, product):
+        if not isinstance(product, Product):
+            raise TypeError(
+                "Можно добавлять только объекты класса Product или его наследников."
+            )
+        self._products.append(product)
+        Category.product_count += 1
+
+    @property
+    def products(self):
+        return "\n".join(str(product) for product in self._products) + "\n"
+
+    @classmethod
+    def new_product(cls, product_data: dict):
+        return Product(
+            product_data["name"],
+            product_data["description"],
+            product_data["price"],
+            product_data["quantity"],
+        )
