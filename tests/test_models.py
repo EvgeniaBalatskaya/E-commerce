@@ -1,83 +1,94 @@
-from unittest.mock import patch
+import pytest
 
-from src.models import Category, Product
-
-
-# Тесты для Product
-def test_product_init():
-    product = Product("Test Product", "Test description", 100.0, 10)
-    assert product.name == "Test Product"
-    assert product.description == "Test description"
-    assert product.price == 100.0
-    assert product.quantity == 10
+from src.models import Category, LawnGrass, Product, Smartphone
 
 
-def test_price_setter():
-    product = Product("Test Product", "Test description", 100.0, 10)
-
-    # Проверка, что нельзя установить отрицательную цену
-    with patch("builtins.print") as mocked_print:
-        product.price = -10
-        mocked_print.assert_called_once_with(
-            "Цена не должна быть нулевая или отрицательная"
-        )
-
-    # Проверка понижения цены
-    with patch("builtins.input", return_value="y"):
-        product.price = 90.0
-        assert product.price == 90.0
-
-    # Проверка повышения цены
-    product.price = 120.0
-    assert product.price == 120.0
+def test_product_str():
+    product = Product("Test", "Desc", 100.0, 2)
+    assert str(product) == "Test, 100.0 руб. Остаток: 2 шт."
 
 
-# Тесты для Category
-def test_category_init():
-    product1 = Product("Product1", "Description1", 10.0, 5)
-    product2 = Product("Product2", "Description2", 20.0, 3)
-    category = Category("Category1", "Category Description", [product1, product2])
+def test_product_add():
+    p1 = Product("P1", "D", 100.0, 2)
+    p2 = Product("P2", "D", 50.0, 4)
+    assert p1 + p2 == 100.0 * 2 + 50.0 * 4
 
-    assert category.name == "Category1"
-    assert category.description == "Category Description"
-    assert len(category._products) == 2
-    assert Category.category_count == 1
-    assert Category.product_count == 2
+
+def test_product_add_invalid_type():
+    p1 = Product("P1", "D", 100.0, 2)
+    with pytest.raises(TypeError):
+        _ = p1 + "string"
+
+
+def test_product_price_setter():
+    p = Product("Test", "D", 100.0, 1)
+    p.price = 200.0
+    assert p.price == 200.0
+
+
+def test_product_price_negative(capsys):
+    p = Product("Test", "D", 100.0, 1)
+    p.price = -50
+    captured = capsys.readouterr()
+    assert "Цена не должна быть нулевая или отрицательная" in captured.out
 
 
 def test_category_add_product():
-    # Обнуление счетчика продуктов
-    Category.product_count = 0
-
-    product1 = Product("Product1", "Description1", 10.0, 5)
-    product2 = Product("Product2", "Description2", 20.0, 3)
-    category = Category("Category1", "Category Description", [product1])
-
-    category.add_product(product2)
-
-    # Проверка, что количество продуктов в категории увеличилось
-    assert len(category._products) == 2
-    assert (
-        Category.product_count == 2
-    )  # Считаем, что на старте было 1 продукт, и добавлен второй
+    p = Product("P", "D", 100.0, 1)
+    c = Category("C", "Desc", [])
+    c.add_product(p)
+    assert p in c._products
 
 
-def test_category_products():
-    product1 = Product("Product1", "Description1", 10.0, 5)
-    product2 = Product("Product2", "Description2", 20.0, 3)
-    category = Category("Category1", "Category Description", [product1, product2])
-
-    expected_str = (
-        "Product1, 10.0 руб. Остаток: 5 шт.\n" "Product2, 20.0 руб. Остаток: 3 шт.\n"
-    )
-    assert category.products == expected_str
+def test_category_str():
+    p = Product("P", "D", 100.0, 2)
+    c = Category("Cat", "Description", [p])
+    assert str(c) == "Cat, Description. Количество продуктов: 2 шт."
 
 
-@classmethod
-def new_product(cls, product_data: dict):
-    return Product(
-        product_data["name"],
-        product_data["description"],
-        product_data["price"],
-        product_data["quantity"],
-    )
+def test_category_add_invalid():
+    c = Category("Cat", "Desc", [])
+    with pytest.raises(TypeError):
+        c.add_product("not product")
+
+
+def test_smartphone_inheritance():
+    s = Smartphone("Phone", "Desc", 100.0, 2, 95.5, "Model X", 128, "Black")
+    assert isinstance(s, Product)
+    assert s.model == "Model X"
+    assert s.memory == 128
+
+
+def test_lawngrass_inheritance():
+    g = LawnGrass("Grass", "Desc", 50.0, 10, "Россия", "7 дней", "Зеленый")
+    assert isinstance(g, Product)
+    assert g.country == "Россия"
+    assert g.color == "Зеленый"
+
+
+def test_product_add_different_classes():
+    s = Smartphone("Phone", "Desc", 100.0, 1, 90.0, "X", 128, "Black")
+    g = LawnGrass("Grass", "Desc", 50.0, 1, "Россия", "7 дней", "Зелёный")
+    with pytest.raises(TypeError):
+        _ = s + g
+
+
+def test_smartphone_str():
+    s = Smartphone("Phone", "Desc", 100.0, 1, 90.0, "X", 128, "Black")
+    assert str(s) == "Phone (X, 128GB, Black) — 100.0 руб., 1 шт., эффективность: 90.0"
+
+
+def test_lawngrass_str():
+    g = LawnGrass("Grass", "Desc", 50.0, 2, "Россия", "7 дней", "Зеленый")
+    assert str(g) == "Grass (Зеленый, Россия) — 50.0 руб., 2 шт., всхожесть: 7 дней"
+
+
+def test_category_and_product_counts():
+    # Обнуляем счётчики перед тестом
+    Category.category_count = 0
+
+    p1 = Product("P1", "Desc", 100.0, 1)
+    p2 = Smartphone("P2", "Desc", 150.0, 2, 91.0, "M2", 64, "Blue")
+    c = Category("Test", "Testing", [p1, p2])
+    assert Category.category_count == 1
+    assert c.product_count == 2  # Проверяем количество продуктов в категории
