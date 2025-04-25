@@ -84,11 +84,32 @@ def test_lawngrass_str():
 
 
 def test_category_and_product_counts():
-    # Обнуляем счётчики перед тестом
     Category.category_count = 0
+    Category.product_count = 0
 
     p1 = Product("P1", "Desc", 100.0, 1)
     p2 = Smartphone("P2", "Desc", 150.0, 2, 91.0, "M2", 64, "Blue")
     c = Category("Test", "Testing", [p1, p2])
     assert Category.category_count == 1
-    assert c.product_count == 2  # Проверяем количество продуктов в категории
+    assert c.product_count == 2
+    assert Category.product_count == 2
+
+
+def test_category_add_only_products():
+    c = Category("Test", "Test", [])
+    with pytest.raises(TypeError):
+        c.add_product("not a product")
+    with pytest.raises(TypeError):
+        c.add_product(123)
+    with pytest.raises(TypeError):
+        c.add_product([])
+
+
+def test_add_same_class_products():
+    s1 = Smartphone("S1", "D", 100.0, 1, 90.0, "X", 64, "Black")
+    s2 = Smartphone("S2", "D", 200.0, 2, 95.0, "Y", 128, "White")
+    assert s1 + s2 == 100.0 * 1 + 200.0 * 2
+
+    g1 = LawnGrass("G1", "D", 50.0, 3, "US", "5 дней", "Green")
+    g2 = LawnGrass("G2", "D", 70.0, 4, "UK", "7 дней", "Blue")
+    assert g1 + g2 == 50.0 * 3 + 70.0 * 4
