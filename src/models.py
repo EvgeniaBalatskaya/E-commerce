@@ -9,12 +9,8 @@ class Product:
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        if not isinstance(
-            other, type(self)
-        ):  # используем isinstance для проверки типов
+        if type(self) != type(other):
             raise TypeError("Нельзя складывать продукты разных типов.")
-        if not isinstance(other, Product):
-            return NotImplemented
         return self.price * self.quantity + other.price * other.quantity
 
     @property
@@ -45,9 +41,8 @@ class Category:
         self.description = description
         self._products: list[Product] = []
         Category.category_count += 1
-        self.product_count = 0  # Инициализация счётчика продуктов для этой категории
+        self.product_count = 0
 
-        # Добавляем продукты с помощью метода add_product
         for product in products:
             self.add_product(product)
 
@@ -56,12 +51,13 @@ class Category:
         return f"{self.name}, {self.description}. Количество продуктов: {total_quantity} шт."
 
     def add_product(self, product):
-        if not isinstance(product, Product):
+        if not issubclass(type(product), Product):
             raise TypeError(
                 "Можно добавлять только объекты класса Product или его наследников."
             )
         self._products.append(product)
-        self.product_count += 1  # Увеличиваем счётчик продуктов в категории
+        self.product_count += 1
+        Category.product_count += 1
 
     @property
     def products(self):
@@ -77,7 +73,6 @@ class Category:
         )
 
 
-# Новый класс-наследник: Смартфоны
 class Smartphone(Product):
     def __init__(
         self,
@@ -103,7 +98,6 @@ class Smartphone(Product):
         )
 
 
-# Новый класс-наследник: Газонная трава
 class LawnGrass(Product):
     def __init__(
         self,
