@@ -1,7 +1,7 @@
 import pytest
 
 from src.models import (BaseProduct, Category, LawnGrass, LogMixin, Product,
-                        Smartphone)
+                        Smartphone, ZeroQuantityError)
 
 
 def test_product_str():
@@ -76,13 +76,13 @@ def test_product_add_different_classes():
 
 def test_smartphone_str():
     s = Smartphone("Phone", "Desc", 100.0, 1, 90.0, "X", 128, "Black")
-    expected = "Phone (X, 128GB, Black) - 100.0 руб., 1 шт., " "эффективность: 90.0"
+    expected = "Phone (X, 128GB, Black) - 100.0 руб., 1 шт., эффективность: 90.0"
     assert str(s) == expected
 
 
 def test_lawngrass_str():
     g = LawnGrass("Grass", "Desc", 50.0, 2, "Россия", "7 дней", "Зеленый")
-    expected = "Grass (Зеленый, Россия) - 50.0 руб., 2 шт., " "всхожесть: 7 дней"
+    expected = "Grass (Зеленый, Россия) - 50.0 руб., 2 шт., всхожесть: 7 дней"
     assert str(g) == expected
 
 
@@ -137,3 +137,34 @@ def test_log_mixin_repr():
 def test_product_inherits_base_product():
     p = Product("Test", "Desc", 100.0, 1)
     assert isinstance(p, BaseProduct)
+
+
+def test_zero_quantity_product():
+    with pytest.raises(ZeroQuantityError):
+        Product("Test", "Desc", 100.0, 0)
+
+
+def test_category_middle_price():
+    p1 = Product("P1", "D", 100.0, 2)
+    p2 = Product("P2", "D", 200.0, 3)
+    c = Category("Test", "Test", [p1, p2])
+    assert c.middle_price() == 150.0
+
+
+def test_empty_category_middle_price():
+    c = Category("Test", "Test", [])
+    assert c.middle_price() == 0
+
+
+def test_zero_quantity_add_to_category():
+    c = Category("Test", "Test", [])
+    with pytest.raises(ZeroQuantityError):
+        p = Product("P", "D", 100.0, 0)
+        c.add_product(p)
+
+
+def test_category_add_product_with_zero_quantity():
+    p = Product("P", "D", 100.0, 1)
+    c = Category("Test", "Test", [p])
+    with pytest.raises(ZeroQuantityError):
+        c.add_product(Product("P2", "D2", 200.0, 0))
