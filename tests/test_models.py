@@ -1,6 +1,7 @@
 import pytest
 
-from src.models import Category, LawnGrass, Product, Smartphone
+from src.models import (BaseProduct, Category, LawnGrass, LogMixin, Product,
+                        Smartphone)
 
 
 def test_product_str():
@@ -75,12 +76,14 @@ def test_product_add_different_classes():
 
 def test_smartphone_str():
     s = Smartphone("Phone", "Desc", 100.0, 1, 90.0, "X", 128, "Black")
-    assert str(s) == "Phone (X, 128GB, Black) — 100.0 руб., 1 шт., эффективность: 90.0"
+    expected = "Phone (X, 128GB, Black) - 100.0 руб., 1 шт., " "эффективность: 90.0"
+    assert str(s) == expected
 
 
 def test_lawngrass_str():
     g = LawnGrass("Grass", "Desc", 50.0, 2, "Россия", "7 дней", "Зеленый")
-    assert str(g) == "Grass (Зеленый, Россия) — 50.0 руб., 2 шт., всхожесть: 7 дней"
+    expected = "Grass (Зеленый, Россия) - 50.0 руб., 2 шт., " "всхожесть: 7 дней"
+    assert str(g) == expected
 
 
 def test_category_and_product_counts():
@@ -113,3 +116,24 @@ def test_add_same_class_products():
     g1 = LawnGrass("G1", "D", 50.0, 3, "US", "5 дней", "Green")
     g2 = LawnGrass("G2", "D", 70.0, 4, "UK", "7 дней", "Blue")
     assert g1 + g2 == 50.0 * 3 + 70.0 * 4
+
+
+def test_base_product_abstract():
+    with pytest.raises(TypeError):
+        BaseProduct("Test", "Desc", 100.0, 1)
+
+
+def test_log_mixin_repr():
+    class TestClass(LogMixin):
+        def __init__(self, a, b):
+            super().__init__()
+            self.a = a
+            self.b = b
+
+    obj = TestClass(1, 2)
+    assert repr(obj) == "TestClass(a=1, b=2)"
+
+
+def test_product_inherits_base_product():
+    p = Product("Test", "Desc", 100.0, 1)
+    assert isinstance(p, BaseProduct)

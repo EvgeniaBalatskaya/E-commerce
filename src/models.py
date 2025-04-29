@@ -1,9 +1,55 @@
-class Product:
+from abc import ABC, abstractmethod
+
+
+class LogMixin:
+    """Миксин для логирования создания объектов."""
+
+    def __init__(self, *args, **kwargs):
+        msg = f"Создан объект {self.__class__.__name__} с параметрами: {args}, {kwargs}"
+        print(msg)
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        attrs = ", ".join([f"{k}={v}" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__name__}({attrs})"
+
+
+class BaseProduct(ABC):
+    """Абстрактный базовый класс для продуктов."""
+
+    @abstractmethod
     def __init__(self, name: str, description: str, price: float, quantity: int):
         self.name = name
         self.description = description
-        self.__price = price
+        self._price = price
         self.quantity = quantity
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+    @abstractmethod
+    def __add__(self, other):
+        pass
+
+    @property
+    @abstractmethod
+    def price(self):
+        pass
+
+    @price.setter
+    @abstractmethod
+    def price(self, value: float):
+        pass
+
+
+class Product(BaseProduct, LogMixin):
+    """Класс продукта."""
+
+    def __init__(self, name: str, description: str, price: float, quantity: int):
+        super().__init__(
+            name=name, description=description, price=price, quantity=quantity
+        )
 
     def __str__(self):
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
@@ -15,24 +61,75 @@ class Product:
 
     @property
     def price(self):
-        return self.__price
+        return self._price
 
     @price.setter
     def price(self, value: float):
         if value <= 0:
             print("Цена не должна быть нулевая или отрицательная")
+        elif value < self._price:
+            user_input = input(f"Понизить цену с {self._price} до {value}? (y/n): ")
+            if user_input.lower() == "y":
+                self._price = value
         else:
-            if value < self.__price:
-                user_input = input(
-                    f"Вы хотите понизить цену с {self.__price} до {value}? (y/n): "
-                )
-                if user_input.lower() == "y":
-                    self.__price = value
-            else:
-                self.__price = value
+            self._price = value
+
+
+class Smartphone(Product):
+    """Класс смартфона."""
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        efficiency: float,
+        model: str,
+        memory: int,
+        color: str,
+    ):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self):
+        return (
+            f"{self.name} ({self.model}, {self.memory}GB, {self.color}) - "
+            f"{self.price} руб., {self.quantity} шт., эффективность: {self.efficiency}"
+        )
+
+
+class LawnGrass(Product):
+    """Класс газонной травы."""
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        country: str,
+        germination_period: str,
+        color: str,
+    ):
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self):
+        return (
+            f"{self.name} ({self.color}, {self.country}) - {self.price} руб., "
+            f"{self.quantity} шт., всхожесть: {self.germination_period}"
+        )
 
 
 class Category:
+    """Класс категории продуктов."""
+
     category_count = 0
     product_count = 0
 
@@ -48,7 +145,10 @@ class Category:
 
     def __str__(self):
         total_quantity = sum(product.quantity for product in self._products)
-        return f"{self.name}, {self.description}. Количество продуктов: {total_quantity} шт."
+        return (
+            f"{self.name}, {self.description}. "
+            f"Количество продуктов: {total_quantity} шт."
+        )
 
     def add_product(self, product):
         if not issubclass(type(product), Product):
@@ -70,52 +170,4 @@ class Category:
             product_data["description"],
             product_data["price"],
             product_data["quantity"],
-        )
-
-
-class Smartphone(Product):
-    def __init__(
-        self,
-        name: str,
-        description: str,
-        price: float,
-        quantity: int,
-        efficiency: float,
-        model: str,
-        memory: int,
-        color: str,
-    ):
-        super().__init__(name, description, price, quantity)
-        self.efficiency = efficiency
-        self.model = model
-        self.memory = memory
-        self.color = color
-
-    def __str__(self):
-        return (
-            f"{self.name} ({self.model}, {self.memory}GB, {self.color}) — "
-            f"{self.price} руб., {self.quantity} шт., эффективность: {self.efficiency}"
-        )
-
-
-class LawnGrass(Product):
-    def __init__(
-        self,
-        name: str,
-        description: str,
-        price: float,
-        quantity: int,
-        country: str,
-        germination_period: str,
-        color: str,
-    ):
-        super().__init__(name, description, price, quantity)
-        self.country = country
-        self.germination_period = germination_period
-        self.color = color
-
-    def __str__(self):
-        return (
-            f"{self.name} ({self.color}, {self.country}) — {self.price} руб., "
-            f"{self.quantity} шт., всхожесть: {self.germination_period}"
         )

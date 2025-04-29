@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ecommerce-core"
+name = "e-commerce"
 version = "0.1.0"
 description = "Ядро e-commerce проекта на Python с использованием ООП"
 authors = ["Evgenia <evgeniabalackaa6@gmail.com>"]
