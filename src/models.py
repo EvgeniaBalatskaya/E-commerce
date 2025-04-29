@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 
 
+class ZeroQuantityError(Exception):
+    """Исключение для товаров с нулевым количеством."""
+
+    pass
+
+
 class LogMixin:
     """Миксин для логирования создания объектов."""
 
@@ -47,6 +53,10 @@ class Product(BaseProduct, LogMixin):
     """Класс продукта."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
+        if quantity == 0:
+            raise ZeroQuantityError(
+                "Товар с нулевым количеством не может быть добавлен"
+            )
         super().__init__(
             name=name, description=description, price=price, quantity=quantity
         )
@@ -141,7 +151,14 @@ class Category:
         self.product_count = 0
 
         for product in products:
-            self.add_product(product)
+            try:
+                self.add_product(product)
+            except ZeroQuantityError as e:
+                print(f"Ошибка при добавлении товара: {e}")
+            else:
+                print(f"Товар {product.name} успешно добавлен")
+            finally:
+                print("Обработка добавления товара завершена")
 
     def __str__(self):
         total_quantity = sum(product.quantity for product in self._products)
@@ -155,9 +172,18 @@ class Category:
             raise TypeError(
                 "Можно добавлять только объекты класса Product или его наследников."
             )
+        if product.quantity == 0:
+            raise ZeroQuantityError("Нельзя добавить товар с нулевым количеством")
         self._products.append(product)
         self.product_count += 1
         Category.product_count += 1
+
+    def middle_price(self):
+        try:
+            total = sum(product.price for product in self._products)
+            return total / len(self._products)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def products(self):
